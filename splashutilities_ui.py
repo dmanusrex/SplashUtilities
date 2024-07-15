@@ -15,7 +15,7 @@ import pathlib
 # Appliction Specific Imports
 from config import appConfig
 from version import APP_VERSION
-from splashutilities_core import Update_Clubs, Update_Para, Remove_Initial, Update_Para_Names, Rollback_Names
+from splashutilities_core import Update_Clubs, Update_Para, Remove_Initial, Update_Para_Names, Rollback_Names, Clear_Exceptions
 
 tkContainer = Any
 
@@ -54,6 +54,9 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         self._splash_db = StringVar(value=self._config.get_str("splash_db"))
         self._csv_file = StringVar(value=self._config.get_str("csv_file"))
         self._rollback_file = StringVar(value=self._config.get_str("rollback_file"))
+        self._update_db = BooleanVar(value=self._config.get_bool("update_database"))
+        self._para_level = StringVar(value=self._config.get_str("para_level"))
+        self._update_sdms = BooleanVar(value=self._config.get_bool("update_sdms"))
 
         # self is a vertical container that will contain 3 frames
         self.columnconfigure(0, weight=1)
@@ -67,6 +70,10 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         filesframe.rowconfigure(0, weight=1)
         filesframe.rowconfigure(1, weight=1)
         filesframe.rowconfigure(2, weight=1)
+
+        right_optionsframe = ctk.CTkFrame(optionsframe)
+        right_optionsframe.grid(column=1, row=0, sticky="new", padx=10, pady=10)
+        right_optionsframe.rowconfigure(0, weight=1)
 
         buttonsframe = ctk.CTkFrame(self)
         buttonsframe.grid(column=0, row=4, sticky="news")
@@ -89,6 +96,38 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
 
         # Right options frame for status options
 
+        ctk.CTkLabel(right_optionsframe, text="Program Options").grid(column=0, row=0, sticky="nw", padx=10)
+
+        # Switch for Update Database
+
+        ctk.CTkSwitch(
+            right_optionsframe,
+            text="Update Database",
+            variable=self._update_db,
+            onvalue=True,
+            offvalue=False,
+            command=self._handle_opt_update_db,
+        ).grid(column=0, row=2, sticky="w", padx=20, pady=10)
+
+        ctk.CTkSwitch(
+            right_optionsframe,
+            text="Update SDMS",
+            variable=self._update_sdms,
+            onvalue=True,
+            offvalue=False,
+            command=self._handle_opt_update_sdms,
+        ).grid(column=0, row=4, sticky="w", padx=20, pady=10)
+        # Dropdown list for Para Level
+
+        ctk.CTkLabel(right_optionsframe, text="Para Minimum Level", anchor="w").grid(column=0, row=6, sticky="w")
+        ctk.CTkOptionMenu(
+            right_optionsframe,
+            values=["1", "2", "3", "Int"],
+            command=self._handle_para_level_event,
+            variable=self._para_level,
+        ).grid(column=0, row=7, sticky="w", padx=20, pady=10)
+
+        # Buttons Section
         ctk.CTkLabel(buttonsframe, text="Apply Fixes").grid(column=0, row=0, sticky="w", padx=10, pady=10)
 
         self.qb_report_btn = ctk.CTkButton(buttonsframe, text="Fix Clubs", command=self._handle_reports_btn)
@@ -102,13 +141,16 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         )
         self.remove_initial_btn.grid(column=3, row=1, sticky="news", padx=20, pady=10)
 
+        self.clear_exceptions_btn = ctk.CTkButton(buttonsframe, text="Clear Non-Para", command=self._handle_clear_exceptions)
+        self.clear_exceptions_btn.grid(column=4, row=1, sticky="news", padx=20, pady=10)
+                                       
         self.update_para_names = ctk.CTkButton(
             buttonsframe, text="Update Para Names", command=self._handle_update_para_names
         )
-        self.update_para_names.grid(column=4, row=1, sticky="news", padx=20, pady=10)
+        self.update_para_names.grid(column=5, row=1, sticky="news", padx=20, pady=10)
 
         self.rollback_names = ctk.CTkButton(buttonsframe, text="Rollback Names", command=self._handle_rollback_names)
-        self.rollback_names.grid(column=5, row=1, sticky="news", padx=20, pady=10)
+        self.rollback_names.grid(column=6, row=1, sticky="news", padx=20, pady=10)
 
     def _handle_splash_db_browse(self) -> None:
         splash_db = filedialog.askopenfilename(
@@ -148,6 +190,15 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
             return
         self._config.set_str("rollback_file", rollback_file)
         self._rollback_file.set(rollback_file)
+
+    def _handle_opt_update_db(self) -> None:
+        self._config.set_bool("update_database", self._update_db.get())
+
+    def _handle_opt_update_sdms(self) -> None:
+        self._config.set_bool("update_sdms", self._update_sdms.get())
+
+    def _handle_para_level_event(self, new_para_level: str) -> None:
+        self._config.set_str("para_level", new_para_level)
 
     def buttons(self, newstate) -> None:
         """Enable/disable all buttons"""
@@ -195,6 +246,21 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         if thread.is_alive():
             # check the thread every 100ms
             self.after(100, lambda: self.monitor_remove_initial_thread(thread))
+        else:
+            self.buttons("enabled")
+            thread.join()
+
+    def _handle_clear_exceptions(self) -> None:
+        self.buttons("disabled")
+
+        clear_exceptions_thread = Clear_Exceptions(self._config)
+        clear_exceptions_thread.start()
+        self.monitor_clear_exceptions_thread(clear_exceptions_thread)
+
+    def monitor_clear_exceptions_thread(self, thread):
+        if thread.is_alive():
+            # check the thread every 100ms
+            self.after(100, lambda: self.monitor_clear_exceptions_thread(thread))
         else:
             self.buttons("enabled")
             thread.join()

@@ -42,7 +42,7 @@ class Update_Clubs(Thread):
         _splash_db_file = self._config.get_str("splash_db")
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
         _csv_file = self._config.get_str("csv_file")
-        _update_db = self._config.get_str("update_database")
+        _update_db = self._config.get_bool("update_database")
         _update_db = False
         try:
             logging.info("Reading CSV File...")
@@ -143,8 +143,8 @@ class Update_Para(Thread):
 
         _splash_db_file = self._config.get_str("splash_db")
         _splash_db_driver = self._config.get_str("splash_db_driver")
-        _update_db = self._config.get_str("update_database")
-        _update_sdms = self._config.get_str("update_sdms")
+        _update_db = self._config.get_bool("update_database")
+        _update_sdms = self._config.get_bool("update_sdms")
 
         logging.info("Database updates: %s", _update_db)
         logging.info("SDMS updates: %s", _update_sdms)
@@ -292,7 +292,7 @@ class Update_Para_Names(Thread):
 
         _splash_db_file = self._config.get_str("splash_db")
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
-        _update_db = self._config.get_str("update_database")
+        _update_db = self._config.get_bool("update_database")
         _rollback_file = self._config.get_str("rollback_file")
 
         logging.info("Reading Splash Database...")
@@ -372,7 +372,7 @@ class Rollback_Names(Thread):
         _splash_db_file = self._config.get_str("splash_db")
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
         _rollback_file = self._config.get_str("rollback_file")
-        _update_db = self._config.get_str("update_database")
+        _update_db = self._config.get_bool("update_database")
 
         logging.info("Updating Splash Database...")
 
@@ -408,7 +408,7 @@ class Clear_Exceptions(Thread):
         _splash_db_file = self._config.get_str("splash_db")
         #        _splash_db_driver = self._config.get_str("splash_db_driver")
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
-        _update_db = self._config.get_str("update_database")
+        _update_db = self._config.get_bool("update_database")
 
         logging.info("Reading Splash Database...")
 
@@ -474,6 +474,7 @@ class Remove_Initial(Thread):
 
         _splash_db_file = self._config.get_str("splash_db")
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
+        _update_db = self._config.get_bool("update_database")
 
         logging.info("Reading Splash Database...")
 
@@ -505,8 +506,9 @@ class Remove_Initial(Thread):
 
                 SQL = "UPDATE ATHLETE SET FIRSTNAME = ? WHERE ATHLETEID = ? "
 
-                # cursor.execute(SQL, (new_firstname, athlete_id))
-                con.commit()
+                if _update_db:
+                    cursor.execute(SQL, (new_firstname, athlete_id))
+                    con.commit()
 
                 logging.info("Athlete %s, %s updated to %s, %s", lastname, firstname, lastname, new_firstname)
 

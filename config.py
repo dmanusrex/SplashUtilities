@@ -27,6 +27,7 @@ class appConfig:
             "update_database": "False",  # Update the database
             "update_sdms": "False",  # Update SDMS
             "rollback_file": "rollback.csv",  # Rollback file
+            "para_level": "3",  # Para Level
         }
     }
 
