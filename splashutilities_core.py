@@ -318,42 +318,37 @@ class Update_Para_Names(Thread):
 
         rows = cursor.fetchall()
 
-        with open(_rollback_file, "w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow(["ATHLETEID", "FIRSTNAME", "LASTNAME"])
+        for row in rows:
+            athlete_id = row[0]
+            firstname = row[1]
+            lastname = row[2]
+            license = row[3]
+            nation = row[4]
 
-            for row in rows:
-                athlete_id = row[0]
-                firstname = row[1]
-                lastname = row[2]
-                license = row[3]
-                nation = row[4]
+            # find the athlete in the roster
 
-                # find the athlete in the roster
+            if nation != "CAN":
+                continue
 
-                if nation != "CAN":
-                    continue
+            mylist = list(filter(lambda person: str(person["SNC_ID"]) == license, roster))
 
-                mylist = list(filter(lambda person: str(person["SNC_ID"]) == license, roster))
+            if len(mylist) != 1:  # We only update Para Athletes so skip anyone not on the roster
+                continue
 
-                if len(mylist) != 1:  # We only update Para Athletes so skip anyone not on the roster
-                    continue
+            athlete = mylist[0]
 
-                athlete = mylist[0]
-
-                if (firstname != athlete["Given_Name"]) or (lastname != athlete["Family_Name"]):
-                    writer.writerow([athlete_id, firstname, lastname])
-                    SQL = "UPDATE ATHLETE SET FIRSTNAME = ?, LASTNAME = ? WHERE ATHLETEID = ? "
-                    if _update_db:
-                        con.execute(SQL, (athlete["Given_Name"], athlete["Family_Name"], athlete_id))
-                        con.commit()
-                    logging.info(
-                        "Athlete %s %s updated to %s %s",
-                        firstname,
-                        lastname,
-                        athlete["Given_Name"],
-                        athlete["Family_Name"],
-                    )
+            if (firstname != athlete["Given_Name"]) or (lastname != athlete["Family_Name"]):
+                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ?, LASTNAMEEN = ? WHERE ATHLETEID = ? "
+                if _update_db:
+                    con.execute(SQL, (athlete["Given_Name"], athlete["Family_Name"], athlete_id))
+                    con.commit()
+                logging.info(
+                    "Athlete %s %s updated to %s %s",
+                    firstname,
+                    lastname,
+                    athlete["Given_Name"],
+                    athlete["Family_Name"],
+                )
 
         con.close()
         logging.info("Update Complete")
@@ -504,7 +499,7 @@ class Remove_Initial(Thread):
 
                 new_firstname = " ".join(y)
 
-                SQL = "UPDATE ATHLETE SET FIRSTNAME = ? WHERE ATHLETEID = ? "
+                SQL = "UPDATE ATHLETE SET FIRSTNAMEN = ? WHERE ATHLETEID = ? "
 
                 if _update_db:
                     cursor.execute(SQL, (new_firstname, athlete_id))

@@ -90,9 +90,9 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         btn2.grid(column=0, row=2, padx=20, pady=10)
         ctk.CTkLabel(filesframe, textvariable=self._csv_file).grid(column=1, row=2, sticky="w", padx=(0, 10))
 
-        btn3 = ctk.CTkButton(filesframe, text="Name Rollback File", command=self._handle_rollback_file_browse)
-        btn3.grid(column=0, row=5, padx=20, pady=10)
-        ctk.CTkLabel(filesframe, textvariable=self._rollback_file).grid(column=1, row=5, sticky="w", padx=(0, 10))
+        #btn3 = ctk.CTkButton(filesframe, text="Name Rollback File", command=self._handle_rollback_file_browse)
+        #btn3.grid(column=0, row=5, padx=20, pady=10)
+        #ctk.CTkLabel(filesframe, textvariable=self._rollback_file).grid(column=1, row=5, sticky="w", padx=(0, 10))
 
         # Right options frame for status options
 
@@ -149,8 +149,8 @@ class _Splash_Fixes_Tab(ctk.CTkFrame):  # pylint: disable=too-many-ancestors
         )
         self.update_para_names.grid(column=5, row=1, sticky="news", padx=20, pady=10)
 
-        self.rollback_names = ctk.CTkButton(buttonsframe, text="Rollback Names", command=self._handle_rollback_names)
-        self.rollback_names.grid(column=6, row=1, sticky="news", padx=20, pady=10)
+        #self.rollback_names = ctk.CTkButton(buttonsframe, text="Rollback Names", command=self._handle_rollback_names)
+        #self.rollback_names.grid(column=6, row=1, sticky="news", padx=20, pady=10)
 
     def _handle_splash_db_browse(self) -> None:
         splash_db = filedialog.askopenfilename(
