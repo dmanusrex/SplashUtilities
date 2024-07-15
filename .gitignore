@@ -2,11 +2,11 @@
 # Application Specific
 .vscode/
 *.exe
-TimeValidate.ini
-TimeValidate.zip
+splashutilities.ini
+splashutilities.zip
 build/
-TimeValidate.fileinfo
-TimeValidate.log
+splashutilities.fileinfo
+splashutilities.log
 version.py
 CTkMessagebox/*.py
 TestData/
@@ -48,7 +48,7 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+#*.spec
 
 # Installer logs
 pip-log.txt

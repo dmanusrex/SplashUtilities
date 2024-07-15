@@ -89,7 +89,7 @@ v = vinfo.VSVersionInfo(
         ),
     ],
 )
-with open("TimeValidate.fileinfo", "w") as f:
+with open("splashutilities.fileinfo", "w") as f:
     f.write(str(v))
     f.flush()
     f.close()
@@ -97,7 +97,7 @@ with open("TimeValidate.fileinfo", "w") as f:
 print("Invoking PyInstaller to generate executable...\n")
 
 # Build it
-PyInstaller.__main__.run(["--distpath=dist", "--workpath=build", "SplashUtilities.spec"])
+PyInstaller.__main__.run(["--distpath=dist", "--workpath=build", "splashutilities.spec"])
 
 # Put back the original version.py
 
