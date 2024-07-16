@@ -429,7 +429,8 @@ class Clear_Exceptions(Thread):
         cursor = con.cursor()
         cursor.execute(SQL)
         rows = cursor.fetchall()
-
+        _count_exceptions = 0
+        
         for row in rows:
             athlete_id = row[0]
             firstname = row[1]
@@ -445,7 +446,7 @@ class Clear_Exceptions(Thread):
 
             mylist = list(filter(lambda person: str(person["SNC_ID"]) == license, roster))
 
-            _count_exceptions = 0
+
 
             if len(mylist) != 1:
                 if handicapex is not None:

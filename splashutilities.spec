@@ -40,7 +40,7 @@ exe = EXE(
     splash,
     [],
     exclude_binaries=True,
-    name='SplashUtiltiies',
+    name='SplashUtilities',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

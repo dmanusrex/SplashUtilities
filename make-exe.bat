@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 ::: Build and Sign the exe
 python build.py
 
-signtool sign /a /s MY /n "NGN Management Inc."  /tr http://timestamp.sectigo.com /fd SHA256 /td SHA256 /v dist\SplashUtilities\splashutilities.exe
+signtool sign /a /s MY /n "NGN Management Inc."  /tr http://timestamp.sectigo.com /fd SHA256 /td SHA256 /v dist\SplashUtilities\SplashUtilities.exe
 
 ::: Build the installer
 
