@@ -145,6 +145,9 @@ class Update_Para(Thread):
         _splash_db_driver = self._config.get_str("splash_db_driver")
         _update_db = self._config.get_bool("update_database")
         _update_sdms = self._config.get_bool("update_sdms")
+        _para_level = self._config.get_str("para_level")
+        _para_level_list = ["1","2","3","Int"]
+        _para_levels = _para_level_list[_para_level_list.index(_para_level):]
 
         logging.info("Database updates: %s", _update_db)
         logging.info("SDMS updates: %s", _update_sdms)
@@ -274,8 +277,8 @@ class Update_Para(Thread):
                     con.execute(SQL, (athlete["SDMS_ID"], athlete_id))
                     con.commit()
 
-            if str(athlete["Level"]) not in ("3", "Int"):
-                logging.warning("Athlete %s %s not at minimum meet level: %s", firstname, lastname, athlete["Level"])
+            if str(athlete["Level"]) not in _para_levels:
+                logging.warning("Athlete %s %s not at minimum meet level %s has level %s", firstname, lastname, _para_level, athlete["Level"])
 
         con.close()
         logging.info("Report Complete")
@@ -499,7 +502,7 @@ class Remove_Initial(Thread):
 
                 new_firstname = " ".join(y)
 
-                SQL = "UPDATE ATHLETE SET FIRSTNAMEN = ? WHERE ATHLETEID = ? "
+                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ? WHERE ATHLETEID = ? "
 
                 if _update_db:
                     cursor.execute(SQL, (new_firstname, athlete_id))
