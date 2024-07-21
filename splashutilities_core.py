@@ -55,7 +55,12 @@ class Update_Clubs(Thread):
         logging.info("Reading Splash Database...")
 
         connection_string = "DRIVER={};DBQ={};".format(_splash_db_driver, _splash_db_file)
-        con = pyodbc.connect(connection_string)
+        try:
+            con = pyodbc.connect(connection_string)
+        except pyodbc.Error as ex:
+            logging.error("Error connecting to database")
+            logging.error(ex)
+            return
 
         SQL = "SELECT CLUBID, CODE, NAME, NATION, REGION " "FROM CLUB "
 
@@ -155,7 +160,11 @@ class Update_Para(Thread):
         logging.info("Opening Splash Database")
 
         connection_string = "DRIVER={};DBQ={};".format(_splash_db_driver, _splash_db_file)
-        con = pyodbc.connect(connection_string)
+        try:
+            con = pyodbc.connect(connection_string)
+        except pyodbc.Error as ex:
+            logging.error("Error connecting to database")
+            logging.error(ex)
 
         # Get the active roster
         roster = get_active_roster()
@@ -170,8 +179,15 @@ class Update_Para(Thread):
         # iterate over the returned rows and set the region code to the province field from the CSV file
 
         cursor = con.cursor()
-        cursor.execute(SQL)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(SQL)
+            rows = cursor.fetchall()
+        except pyodbc.Error as ex:
+            logging.error("Error reading database")
+            # log the error reason and return
+            logging.error(ex)
+            con.close()
+            return
 
         for row in rows:
             athlete_id = row[0]
@@ -301,7 +317,12 @@ class Update_Para_Names(Thread):
         logging.info("Reading Splash Database...")
 
         connection_string = "DRIVER={};DBQ={};".format(_splash_db_driver, _splash_db_file)
-        con = pyodbc.connect(connection_string)
+        try:
+            con = pyodbc.connect(connection_string)
+        except pyodbc.Error as ex:
+            logging.error("Error connecting to database")
+            logging.error(ex)
+            return
 
         # Get the active roster
 
@@ -316,8 +337,15 @@ class Update_Para_Names(Thread):
 
         # iterate over the returned rows and update the firname and lastname fields. Create a rollback file with the old names
 
-        cursor = con.cursor()
-        cursor.execute(SQL)
+        try:
+            cursor = con.cursor()
+            cursor.execute(SQL)
+        except pyodbc.Error as ex:
+            logging.error("Error reading database")
+            # log the error reason and return
+            logging.error(ex)
+            con.close()
+            return
 
         rows = cursor.fetchall()
 
@@ -411,7 +439,12 @@ class Clear_Exceptions(Thread):
         logging.info("Reading Splash Database...")
 
         connection_string = "DRIVER={};DBQ={};".format(_splash_db_driver, _splash_db_file)
-        con = pyodbc.connect(connection_string)
+        
+        try:
+            con = pyodbc.connect(connection_string)
+        except pyodbc.Error as ex:
+            logging.error("Error connecting to database")
+            logging.error(ex)
 
         # Get the active roster
 
@@ -427,8 +460,15 @@ class Clear_Exceptions(Thread):
         # iterate over the returned rows and set the region code to the province field from the CSV file
 
         cursor = con.cursor()
-        cursor.execute(SQL)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(SQL)
+            rows = cursor.fetchall()
+        except pyodbc.Error as ex:
+            logging.error("Error reading database")
+            # log the error reason and return
+            logging.error(ex)
+            con.close()
+            return
         _count_exceptions = 0
         
         for row in rows:
@@ -478,13 +518,25 @@ class Remove_Initial(Thread):
         logging.info("Reading Splash Database...")
 
         connection_string = "DRIVER={};DBQ={};".format(_splash_db_driver, _splash_db_file)
-        con = pyodbc.connect(connection_string)
+        try: 
+            con = pyodbc.connect(connection_string)
+        except pyodbc.Error as ex:
+            logging.error("Error connecting to database")
+            logging.error(ex)
+            return
 
         SQL = "SELECT ATHLETEID, FIRSTNAME, LASTNAME FROM ATHLETE ORDER BY LASTNAME, FIRSTNAME"
 
         cursor = con.cursor()
-        cursor.execute(SQL)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(SQL)
+            rows = cursor.fetchall()
+        except pyodbc.Error as ex:
+            logging.error("Error reading database")
+            # log the error reason and return
+            logging.error(ex)
+            con.close()
+            return
 
         number_changed = 0
 
@@ -506,8 +558,14 @@ class Remove_Initial(Thread):
                 SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ? WHERE ATHLETEID = ? "
 
                 if _update_db:
-                    cursor.execute(SQL, (new_firstname, athlete_id))
-                    con.commit()
+                    try:
+                        cursor.execute(SQL, (new_firstname, athlete_id))
+                        con.commit()
+                    except pyodbc.Error as ex:
+                        logging.error("Error updating database for %s %s", lastname, firstname)
+                        logging.error(ex)
+                        con.close()
+                        return
 
                 logging.info("Athlete %s, %s updated to %s, %s", lastname, firstname, lastname, new_firstname)
 

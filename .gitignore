@@ -11,6 +11,7 @@ version.py
 CTkMessagebox/*.py
 TestData/
 *.csv
+*.xls
 *.db
 *.mdb
 *.txt
