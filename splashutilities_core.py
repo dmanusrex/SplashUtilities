@@ -369,7 +369,9 @@ class Update_Para_Names(Thread):
             athlete = mylist[0]
 
             if (firstname != athlete["Given_Name"]) or (lastname != athlete["Family_Name"]):
-                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ?, LASTNAMEEN = ? WHERE ATHLETEID = ? "
+#                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ?, LASTNAMEEN = ? WHERE ATHLETEID = ? "
+                SQL = "UPDATE ATHLETE SET FIRSTNAME = ?, LASTNAME = ? WHERE ATHLETEID = ? "
+
                 if _update_db:
                     con.execute(SQL, (athlete["Given_Name"], athlete["Family_Name"], athlete_id))
                     con.commit()
@@ -415,9 +417,13 @@ class Rollback_Names(Thread):
 
                 SQL = "UPDATE ATHLETE SET FIRSTNAME = ?, LASTNAME = ? WHERE ATHLETEID = ? "
                 if _update_db:
-                    con.execute(SQL, (firstname, lastname, athlete_id))
-                    con.commit()
-                logging.info("Athlete %s restored to %s %s", athlete_id, firstname, lastname)
+                    try:
+                        con.execute(SQL, (firstname, lastname, athlete_id))
+                        con.commit()
+                        logging.info("Athlete %s restored to %s %s", athlete_id, firstname, lastname)
+                    except pyodbc.Error as ex:
+                        logging.error("Error updating database for %s %s", lastname, firstname)
+                        logging.error(ex)
 
         con.close()
         logging.info("Restore Complete")
@@ -555,7 +561,8 @@ class Remove_Initial(Thread):
 
                 new_firstname = " ".join(y)
 
-                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ? WHERE ATHLETEID = ? "
+#                SQL = "UPDATE ATHLETE SET FIRSTNAMEEN = ? WHERE ATHLETEID = ? "
+                SQL = "UPDATE ATHLETE SET FIRSTNAME = ? WHERE ATHLETEID = ? "
 
                 if _update_db:
                     try:
