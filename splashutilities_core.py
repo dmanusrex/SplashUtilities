@@ -26,8 +26,15 @@ def get_active_roster() -> list:
         logging.error("Error retrieving Active Roster: %s", ex)
         return []
 
+    # Be sure to convert SNC ID to a string to match the database field
     roster = response.json()
+    for athlete in roster:
+        athlete["SNC_ID"] = str(int(athlete["SNC_ID"]))
 
+    # dump the first 5 records to the log
+    logging.info("Active Roster Retrieved - Total Athletes = %s", len(roster))
+    #for i in range(5):
+    #    logging.info("  %s %s ID: %s", roster[i]["Family_Name"], roster[i]["Given_Name"] , roster[i]["SNC_ID"])
     return roster
 
 
@@ -43,7 +50,7 @@ class Update_Clubs(Thread):
         _splash_db_driver = "{Microsoft Access Driver (*.mdb, *.accdb)}"
         _csv_file = self._config.get_str("csv_file")
         _update_db = self._config.get_bool("update_database")
-        _update_db = False
+
         try:
             logging.info("Reading CSV File...")
             data = self.csv_to_dict(_csv_file)
@@ -103,8 +110,9 @@ class Update_Clubs(Thread):
                 if _update_db:
                     cursor.execute(SQL, (province, club_id))
                     con.commit()
-
-                logging.info("Club Code %s updated to Province %s", club_code, province)
+                    logging.info("Club Code %s updated to Province %s", club_code, province)
+                else:
+                    logging.info("Would have updated Club Code %s to Province %s", club_code, province)
 
             # Set the preferred club long name if one is set.
             if preferred_club_name is not None:
@@ -161,6 +169,7 @@ class Update_Para(Thread):
         roster = get_active_roster()
         if len(roster) == 0:
             con.close()
+            logging.error("No Active Roster")
             return
 
         # Get all the Athlete Data
@@ -193,18 +202,18 @@ class Update_Para(Thread):
             mylist = list(filter(lambda person: str(person["SNC_ID"]) == license, roster))
 
             if len(mylist) != 1:
-                # logging.error("Athlete %s %s not found in Active Roster", firstname, lastname)
+                #logging.error("Athlete %s %s (%s) not found in Active Roster", firstname, lastname, license)
                 continue
-            #    print("Found Para for ", firstname, lastname, " in Active Roster")
+            # print("Found Para for ", firstname, lastname, " in Active Roster")
             athlete = mylist[0]
 
             # Check if the fields match the roster individually.  IF not, log it and update it
 
-            if athlete["S"] in ("NE", "PSPI", "PSVI", "PSII"):
+            if athlete["S"] in ("NE", "PSPI", "PSVI", "PSII", "PI","II","VI", "") or athlete["S"] is None:
                 athlete["S"] = "0"
-            if athlete["SB"] in ("NE", "PSPI", "PSVI", "PSII"):
+            if athlete["SB"] in ("NE", "PSPI", "PSVI", "PSII", "PI","II","VI","") or athlete["SB"] is None:
                 athlete["SB"] = "0"
-            if athlete["SM"] in ("NE", "PSPI", "PSVI", "PSII"):
+            if athlete["SM"] in ("NE", "PSPI", "PSVI", "PSII", "PI","II","VI", "") or athlete["SM"] is None:
                 athlete["SM"] = "0"
 
             if athlete["SDMS_ID"] is None:
@@ -264,7 +273,7 @@ class Update_Para(Thread):
                     con.execute(SQL, (athlete["SM"], athlete_id))
                     con.commit()
 
-            if athlete["SDMS_ID"] != str(sdmsid):
+            if (athlete["SDMS_ID"] != str(sdmsid))  and (athlete["Level"] == "Int"):
                 logging.error(
                     "Athlete %s %s SDMSID mismatch. Splash: %s Roster: %s",
                     firstname,
