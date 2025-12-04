@@ -3,7 +3,7 @@
 setlocal EnableDelayedExpansion
 
 ::: Build and Sign the exe
-python build.py
+ C:/Users/Darren/AppData/Local/Programs/Python/Python311/python.exe build.py
 
 signtool sign /a /s MY /n "NGN Management Inc."  /tr http://timestamp.sectigo.com /fd SHA256 /td SHA256 /v dist\SplashUtilities\SplashUtilities.exe
 

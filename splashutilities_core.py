@@ -237,17 +237,25 @@ class Update_Para(Thread):
             else:
                 athlete["SDMS_ID"] = str(int(athlete["SDMS_ID"]))
 
-            if str(athlete["Exceptions"]) != str(handicapex):
+            parts = str(athlete["Exceptions"]).split(",")
+
+            letters = sorted([p for p in parts if p.isalpha() and p.upper() != "J"])
+            numbers = sorted([p for p in parts if p.isdigit()], key=int)
+            pluses = [p for p in parts if p == "+"]
+
+            rev_exceptions = ",".join(letters + numbers + pluses)
+           
+            if rev_exceptions != str(handicapex):
                 logging.error(
                     "Athlete %s %s exceptions mismatch. Splash: %s Roster: %s",
                     firstname,
                     lastname,
                     handicapex,
-                    athlete["Exceptions"],
+                    rev_exceptions
                 )
                 if _update_db:
                     SQL = "UPDATE ATHLETE SET HANDICAPEX = ? WHERE ATHLETEID = ? "
-                    con.execute(SQL, (str(athlete["Exceptions"]), athlete_id))
+                    con.execute(SQL, (rev_exceptions, athlete_id))
                     con.commit()
 
             if str(athlete["S"]) != str(handicaps):
